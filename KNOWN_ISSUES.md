@@ -39,3 +39,15 @@ Read before debugging. Format: problem → cause → fix / prevention.
 - **Fix / prevention:** keep `GlobalStyles` out of tests (only `main.ts` imports it). Check fonts
   with a Metro build instead: `npx expo export --platform android --dump-assetmap` lists the `.ttf`
   files it bundled.
+
+## Android emulator: Expo Go shows a white or black screen and ignores taps
+
+- **Problem:** Metro serves the bundle and logcat shows `Running "main"` with no JS error, but
+  Expo Go's window never draws (white on the device, black in `adb exec-out screencap`), its dev
+  menu ignores taps and Android eventually reports an ANR. The template app does the same, so it
+  is not the app.
+- **Cause:** host GPU rendering (`hw.gpu.mode=auto`) on this Linux host (AMD Radeon, Mesa) with
+  the API 36 image: HWUI logs EGL config failures. `-gpu swiftshader_indirect` segfaults (exit 139).
+- **Fix:** start the emulator with SwANGLE software rendering:
+  `~/Android/Sdk/emulator/emulator @QodeOS-Pixel -gpu swangle_indirect -no-snapshot-load`.
+  Give the AVD at least 4 GB (`hw.ramSize=4096` in its `config.ini`, no unit suffix).
