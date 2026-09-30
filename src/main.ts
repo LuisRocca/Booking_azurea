@@ -1,14 +1,22 @@
 import { AppRegistry, Image, Platform, processColor } from 'react-native';
 import { mount } from '@ng-native/platform';
 import { currentConditions, deviceTokens, watchConditions } from '@ng-native/device';
-import { getFabricUIManager, registerPlatformComponents } from '@ng-native/fabric';
+import { loadFonts } from '@ng-native/expo/fonts';
+import { getFabricUIManager, registerPlatformComponents, styleSheetOf } from '@ng-native/fabric';
 import { appProviders } from './app/app.config.ts';
 import { App } from './app/app.ts';
+import { GlobalStyles } from './app/global-styles.ts';
 
 registerPlatformComponents(Platform.OS);
 
 AppRegistry.registerRunnable('main', ({ rootTag }: { rootTag: number | string }) => {
+  const globalStyles = styleSheetOf(GlobalStyles);
+  // Registers the @font-face files. Mounting does not wait: text re-lays out as each face lands.
+  void loadFonts(globalStyles);
+
   const app = mount(Number(rootTag), App, getFabricUIManager(), {
+    // Matched against every node: the font family for all text. See global-styles.ts.
+    globalStyles,
     // The router and HttpClient, shared with the tests: see app.config.ts.
     providers: appProviders,
     // Colours, as the integers the platform wants.

@@ -30,3 +30,12 @@ Read before debugging. Format: problem → cause → fix / prevention.
 - **Cause:** a native switch changes by its own `change` event, not by a touch.
 - **Fix:** `await fireEvent(switchNode, 'change', { value: true })`
   (see `booking.page.test.ts`).
+
+## Tests: "require is not a function" when importing `GlobalStyles`
+
+- **Problem:** a test that imports `src/app/global-styles.ts` fails to load.
+- **Cause:** each `@font-face` `url()` compiles to a `require()` so Metro ships the file, and
+  Vitest runs ESM, where `require` does not exist.
+- **Fix / prevention:** keep `GlobalStyles` out of tests (only `main.ts` imports it). Check fonts
+  with a Metro build instead: `npx expo export --platform android --dump-assetmap` lists the `.ttf`
+  files it bundled.
