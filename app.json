@@ -29,7 +29,8 @@
       }
     },
     "plugins": [
-      "@ng-native/metro"
+      "@ng-native/metro",
+      "expo-secure-store"
     ]
   }
 }
