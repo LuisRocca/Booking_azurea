@@ -86,3 +86,15 @@ Read before debugging. Format: problem → cause → fix / prevention.
   the Android keys (`tabBarItemActiveIndicatorColor` as a packed ARGB integer, since the router
   passes it through unprocessed) and fonts by face name: `Plus Jakarta Sans-600`,
   `Plus Jakarta Sans-700`.
+
+## A stay that fails to load crashes its screen: `ResourceValueError`
+
+- **Problem:** opening a stay that does not exist (a 404) showed nothing instead of "No encontramos
+  este alojamiento", and the console reported `ResourceValueError: Resource is currently in an
+  error state`.
+- **Cause:** Angular's `resource().value()` throws while the resource is in error. The page read
+  `stay.value()?.name` in the header and `@if (stay.value(); as stay)` before checking `error()`,
+  so the error branch was never reached. The `?.` does not help: the call itself throws.
+- **Fix / prevention:** read `hasValue()` before `value()` everywhere a resource can fail (detail,
+  booking form, Home, Explore). `stay-detail.page.test.ts` and `booking.page.test.ts` cover the
+  error path.

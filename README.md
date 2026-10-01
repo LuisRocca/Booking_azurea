@@ -136,15 +136,27 @@ Plus Jakarta Sans.
 ## Tests
 
 Los tests corren en Node sin simulador: `render()`, consultas por rol o texto, e interacciones
-con `userEvent`, todo de `@ng-native/testing`.
+con `userEvent`, todo de `@ng-native/testing`. `npm test` corre la suite completa.
 
-- `app.test.ts`: la app completa con sus providers reales; abre un alojamiento.
-- `explore.page.test.ts`: servicio sustituido por un stub; escribe en el buscador nativo.
-- `booking.page.test.ts`: validaciones, total en vivo, error del servidor y reserva guardada.
-- `bookings.page.test.ts`: cancelar con el diálogo sustituido.
+| Capa | Archivos | Qué cubre |
+| --- | --- | --- |
+| Lógica | `core/booking-rules.test.ts`, `core/dates.test.ts` | Precio total, fechas locales, rangos "5–8 oct", reservas pasadas |
+| API local | `core/api.test.ts` | Los servicios a través de un `HttpClient` real y el interceptor: listar, 404, 422, 409, guardar y cancelar |
+| Estado | `core/onboarding.service.test.ts` | La Bienvenida se muestra una vez, esperando a que `Storage` lea |
+| Componentes | `ui/icon.test.ts`, `ui/chip.test.ts` | El icono se tiñe con su token; los chips escriben la selección por su `model()` |
+| Pantallas | `features/*/*.page.test.ts` | Cada pantalla: carga, errores (incluido el 404), formulario, cancelar con el diálogo sustituido, badge e iconos de las pestañas |
+| App completa | `app.test.ts` | Bienvenida, abrir un alojamiento y reservar hasta la Confirmación, con los providers reales |
+| Guarda nativa | `native-layout.test.ts` | Recorre todas las pantallas y falla si un ScrollView tiene más de un hijo directo (lo que rompe Android) |
 
-La capa nativa falsa no aplica todas las restricciones de Android. Un cambio de layout nativo
-se verifica también en el emulador.
+Patrones que conviene copiar:
+
+- Un servicio se sustituye con `providers: [{ provide: X, useValue: ... }]` (Explorar, Mis reservas).
+- Para probar un servicio sin pantalla, monta un componente vacío y usa `componentRef.injector`.
+- Un `<switch>` no se pulsa: se le envía su evento nativo, `fireEvent(node, 'change', { value: true })`.
+- La barra de pestañas es nativa: sus props se leen del árbol (`fabric.committed`), no por texto.
+
+La capa nativa falsa no aplica todas las restricciones de Android; la guarda nativa cubre la que
+ya rompió la app, y un cambio de layout nativo se verifica también en el emulador.
 
 ## Problemas conocidos
 
