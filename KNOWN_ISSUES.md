@@ -73,3 +73,16 @@ Read before debugging. Format: problem → cause → fix / prevention.
 - **Fix / prevention:** restart Metro with a cleared cache: `npx expo start --clear`. Compare with
   `npx expo export --platform android` to tell a stale Metro from a real resolution error. Do not
   set `CI=1` for development: it turns watch mode and reloads off.
+
+## Android tab bar stays lilac, and bars ignore the app font
+
+- **Problem:** the bottom bar keeps Material's lilac background and selection pill, and the tab
+  labels and header titles draw in Roboto, though `withTabDefaults` sets a `backgroundColor`.
+- **Cause:** a tabs outlet's `backgroundColor` paints the container behind the screens, not the
+  bar. The bar reads `standardAppearance`, and Android reads its label font and active indicator
+  at that object's top level, keys `TabAppearance` does not type. Bar props also bypass the CSS
+  font matching, so they need a registered face name.
+- **Fix / prevention:** `app.config.ts` sets `standardAppearance` with `tabBarBackgroundColor`,
+  the Android keys (`tabBarItemActiveIndicatorColor` as a packed ARGB integer, since the router
+  passes it through unprocessed) and fonts by face name: `Plus Jakarta Sans-600`,
+  `Plus Jakarta Sans-700`.
