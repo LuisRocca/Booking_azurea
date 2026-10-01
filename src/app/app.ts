@@ -40,7 +40,9 @@ import { NativeStackOutlet } from '@ng-native/router';
       --on-royal: light-dark(#ffffff, #07112e);
       --sky: light-dark(#6fb8ff, #3f8fe0);
       --ice: light-dark(#cfe3ff, #15254f);
+      --deep: light-dark(#16307e, #1b3a9c);
       --success: light-dark(#0b7a5c, #4fd1a5);
+      --warning: light-dark(#a15c00, #ffb547);
       --danger: light-dark(#c62a3d, #ff7a88);
       --star: light-dark(#e8a200, #ffc23d);
 
@@ -50,11 +52,14 @@ import { NativeStackOutlet } from '@ng-native/router';
       --shadow-royal: 0 10px 24px light-dark(rgba(47, 91, 234, 0.35), rgba(123, 155, 255, 0.3));
 
       /* Azurea: space and radius */
+      --space-1: 4px;
       --space-2: 8px;
       --space-3: 12px;
       --space-4: 16px;
       --space-5: 20px;
       --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
       --radius-sm: 10px;
       --radius-md: 16px;
       --radius-lg: 24px;
