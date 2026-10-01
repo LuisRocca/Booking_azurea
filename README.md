@@ -14,12 +14,15 @@ No necesita backend: una **API local** dentro de la app responde a todas las pet
 
 | Pantalla | Conceptos | Documentación |
 | --- | --- | --- |
-| Pestañas *Explorar* / *Mis reservas* | Barra de pestañas nativa, badge como signal, un stack por pestaña | [Tabs](https://ng-native.com/packages/router/tabs) |
-| Explorar | `resource()`, buscador nativo en la cabecera, título grande | [Native header](https://ng-native.com/packages/router/header), [Scroll view](https://ng-native.com/packages/components/scroll-view) |
+| Bienvenida (una sola vez) | `nav.present()` a pantalla completa desde un `effect()`, bandera en `Storage` esperando `ready`, `@keyframes` | [Screens](https://ng-native.com/packages/router/screens), [Animations](https://ng-native.com/packages/fabric/animation) |
+| Inicio | Cabecera oculta + `<safe-area-view>`, carrusel horizontal, chips con `model()`, entrada escalonada | [Scroll view](https://ng-native.com/packages/components/scroll-view), [Animations](https://ng-native.com/packages/fabric/animation) |
+| Pestañas *Inicio* / *Explorar* / *Mis reservas* | Barra de pestañas nativa, badge como signal, un stack por pestaña | [Tabs](https://ng-native.com/packages/router/tabs) |
+| Explorar | `resource()`, buscador nativo en la cabecera, título grande, filtro por categoría | [Native header](https://ng-native.com/packages/router/header), [Scroll view](https://ng-native.com/packages/components/scroll-view) |
 | Detalle | Parámetro `:id` como input (`withComponentInputBinding`), push en el stack, barra sobre las pestañas | [Router](https://ng-native.com/packages/router), [Tabs](https://ng-native.com/packages/router/tabs#content-above-the-tab-bar) |
 | Reservar (modal) | `nav.present()`, Signal Forms, validaciones, `submit()`, error del servidor en su campo, teclado | [Build a form](https://ng-native.com/guide/forms), [Screens](https://ng-native.com/packages/router/screens) |
-| Mis reservas | Persistencia en el dispositivo con `Storage`, diálogo nativo de confirmación | [Storage](https://ng-native.com/packages/expo/storage), [Dialogs](https://ng-native.com/packages/device/dialogs) |
-| Toda la app | Tokens de diseño como variables CSS, `light-dark()`, fuente propia | [Theming](https://ng-native.com/guide/theming), [Fonts](https://ng-native.com/packages/expo/fonts) |
+| Confirmación | `nav.replace()` desde el modal, la reserva leída por `:bookingId`, check animado | [Screens](https://ng-native.com/packages/router/screens), [Animations](https://ng-native.com/packages/fabric/animation) |
+| Mis reservas | Persistencia en el dispositivo con `Storage`, próximas y pasadas, diálogo nativo de confirmación | [Storage](https://ng-native.com/packages/expo/storage), [Dialogs](https://ng-native.com/packages/device/dialogs) |
+| Toda la app | Tokens de diseño como variables CSS, `light-dark()`, fuente propia, componentes compartidos en `ui/`, movimiento con `@keyframes`/`transition` y `prefers-reduced-motion` | [Theming](https://ng-native.com/guide/theming), [Fonts](https://ng-native.com/packages/expo/fonts) |
 
 ## Empezar
 
@@ -67,13 +70,19 @@ src/
     global-styles.ts         @font-face y la fuente de toda la app
     core/
       models.ts              tipos: Stay, Booking, BookingRequest, ApiError
+      dates.ts               fechas en español ("Lun 12 oct", "5–8 oct") y si una reserva ya pasó
+      onboarding.service.ts  si este dispositivo ya vio la Bienvenida
       booking-rules.ts       cálculo del total y fechas, compartido por la app y la API
       stays.service.ts       GET /api/stays, GET /api/stays/:id
       bookings.service.ts    POST /api/bookings + reservas guardadas en el dispositivo
       mock-api/
         mock-api.interceptor.ts   la "API": responde a /api/... sin salir a la red
         stays.data.ts             los alojamientos de ejemplo
+    ui/                      piezas de Azurea: Aura, botón, chips, badge, tarjeta de alojamiento…
     features/
+      welcome/               bienvenida, solo la primera vez
+      home/                  inicio: carrusel, categorías y buenos precios
+      confirmation/          reserva confirmada
       tabs/                  barra de pestañas y el stack de cada pestaña
       explore/               lista y buscador
       stay-detail/           detalle
@@ -109,7 +118,13 @@ Plus Jakarta Sans.
 - La cabecera y la barra de pestañas nativas no leen CSS; `app.config.ts` repite esos colores en
   `withHeaderDefaults` y `withTabDefaults`.
 - Nativo no tiene `backdrop-filter`, así que el vidrio es un relleno translúcido sobre el fondo
-  degradado "Aura".
+  degradado "Aura" (`ui/aura.ts`). En Bienvenida y Confirmación el Aura se mueve despacio; en las
+  pantallas con scroll queda quieto, porque los `@keyframes` corren en JS a cada frame.
+- Movimiento: entradas con `@keyframes` (opacidad y `transform`, lo que nativo anima mejor),
+  presión con `transition` sobre un atributo `data-pressed`, y todo se apaga con
+  `prefers-reduced-motion`.
+- Las piezas repetidas viven en `src/app/ui/` (Aura, Button, Chips, Badge, SectionHeader,
+  StayCard); una pantalla nueva las importa en vez de copiar estilos.
 - Las fuentes (pesos 400-800, licencia OFL) están en `assets/fonts/`.
 
 ## Tests

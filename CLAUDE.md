@@ -42,8 +42,14 @@ only adds what it does not say.
   `stays.data.ts` with simulated latency. Services (`core/*.service.ts`) use the real `HttpClient`
   and return Promises, which pages read with `resource({ loader })`.
 - Bookings persist on the device through `Storage.signal('bookings', ...)` from `@ng-native/expo/store`.
-- Navigation: root stack → `TabsPage` (native tabs) → one `TabStack` per tab; the booking form is
-  a root route presented as a modal (`nav.present(['/book', id])`).
+- Navigation: root stack → `TabsPage` (native tabs: Inicio, Explorar, Mis reservas) → one
+  `TabStack` per tab. Root routes presented over the tabs: `welcome` (full screen, once, from
+  `TabsPage`), `book/:stayId` (modal) and `confirmation/:bookingId`, which replaces the form
+  (`nav.replace`). Calling `nav.back()` and then navigating in the same tick races: the second
+  navigation is dropped, so navigate straight to the target url instead.
+- Shared Azurea pieces live in `src/app/ui/` (Aura, Button, Chips, Badge, SectionHeader, StayCard).
+  Motion is `@keyframes`/`transition` on opacity and transform only, with a
+  `prefers-reduced-motion` override in each component.
 - Styling follows the Azurea design system: its tokens are CSS custom properties with
   `light-dark()` on `App`'s `:host`, read with `var()` in every component. Native header and tab
   bar props cannot read CSS, so `app.config.ts` repeats those colors.
