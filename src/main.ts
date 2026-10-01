@@ -9,10 +9,11 @@ import { GlobalStyles } from './app/global-styles.ts';
 
 registerPlatformComponents(Platform.OS);
 
-AppRegistry.registerRunnable('main', ({ rootTag }: { rootTag: number | string }) => {
+AppRegistry.registerRunnable('main', async ({ rootTag }: { rootTag: number | string }) => {
   const globalStyles = styleSheetOf(GlobalStyles);
-  // Registers the @font-face files. Mounting does not wait: text re-lays out as each face lands.
-  void loadFonts(globalStyles);
+  // The faces must be registered before the first layout: text measured in the fallback font keeps
+  // that narrower width once Plus Jakarta Sans draws it, and a chip's label is cut short.
+  await loadFonts(globalStyles);
 
   const app = mount(Number(rootTag), App, getFabricUIManager(), {
     // Matched against every node: the font family for all text. See global-styles.ts.
