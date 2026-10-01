@@ -78,7 +78,7 @@ src/
       mock-api/
         mock-api.interceptor.ts   la "API": responde a /api/... sin salir a la red
         stays.data.ts             los alojamientos de ejemplo
-    ui/                      piezas de Azurea: Aura, botón, chips, badge, tarjeta de alojamiento…
+    ui/                      piezas de Azurea: Aura, botón, chips, badge, icono, tarjeta de alojamiento…
     features/
       welcome/               bienvenida, solo la primera vez
       home/                  inicio: carrusel, categorías y buenos precios
@@ -126,6 +126,12 @@ Plus Jakarta Sans.
 - Las piezas repetidas viven en `src/app/ui/` (Aura, Button, Chips, Badge, SectionHeader,
   StayCard); una pantalla nueva las importa en vez de copiar estilos.
 - Las fuentes (pesos 400-800, licencia OFL) están en `assets/fonts/`.
+- Los iconos de Azurea (44, línea de 1.8 en rejilla de 24) están en `assets/icons/` como PNG
+  blancos a 1x/2x/3x. `<app-icon name="search" tone="royal">` (`ui/icon.ts`) los tiñe con un
+  token: `tint-color: var(--royal)` en CSS llega a nativo como `tintColor`. La barra de pestañas
+  usa los mismos PNG como `template`. Para usar un icono nuevo, impórtalo en `ui/icon.ts`: solo
+  los importados entran en el bundle.
+- El icono de la app y las capas adaptativas de Android están en `assets/`.
 
 ## Tests
 

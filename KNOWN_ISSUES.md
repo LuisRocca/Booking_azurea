@@ -51,3 +51,23 @@ Read before debugging. Format: problem → cause → fix / prevention.
 - **Fix:** start the emulator with SwANGLE software rendering:
   `~/Android/Sdk/emulator/emulator @QodeOS-Pixel -gpu swangle_indirect -no-snapshot-load`.
   Give the AVD at least 4 GB (`hw.ramSize=4096` in its `config.ini`, no unit suffix).
+
+## Labels cut short by one or two letters (chips: "Tod", "Ciuda")
+
+- **Problem:** on Android, text with a natural width, such as a chip label, renders clipped at
+  the end. Text with a set width (`flex: 1`, `numberOfLines`) looks fine.
+- **Cause:** the app mounted before the Plus Jakarta Sans faces were registered. Text was
+  measured in the narrower fallback font and kept that width once the custom face drew it.
+- **Fix / prevention:** `main.ts` awaits `loadFonts()` before `mount()`, as the Fonts page shows.
+  Never fire and forget it.
+
+## Metro: "Unable to resolve module" for a file that exists
+
+- **Problem:** after creating a file (e.g. `src/app/ui/icon.ts`) the device shows a 500 from Metro
+  with `UnableToResolveError`, though `npx expo export` bundles fine. Edits do not hot reload
+  either.
+- **Cause:** Metro was started from `/home/...`, but on Fedora Silverblue `/home` is a symlink to
+  `/var/home`. Metro maps files by their real path and ignores watcher events reported under the
+  other one, so it never sees a new or changed file.
+- **Fix / prevention:** start Metro from the real path: `cd "$(pwd -P)" && npx expo start --clear`.
+  Do not set `CI=1` for development: it turns watch mode and reloads off.
