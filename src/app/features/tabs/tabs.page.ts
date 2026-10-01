@@ -1,12 +1,17 @@
-import { Component, computed, inject } from '@angular/core';
-import { NativeHeader, NativeTab, NativeTabsOutlet } from '@ng-native/router';
+import { Component, computed, effect, inject } from '@angular/core';
+import { NativeHeader, NativeNavigation, NativeTab, NativeTabsOutlet } from '@ng-native/router';
 import { BookingsService } from '../../core/bookings.service.ts';
+import { OnboardingService } from '../../core/onboarding.service.ts';
 
 /**
  * A real tab bar. Tabs are declared as content, so a badge is just a signal.
  * The root stack's header is hidden: each tab's own stack draws its header.
  *
+ * The first time the app opens, Welcome is presented full screen over the tabs. The effect waits
+ * for the stored flag to be read back (see OnboardingService) and presents at most once.
+ *
  * https://ng-native.com/packages/router/tabs
+ * https://ng-native.com/packages/router/screens
  */
 @Component({
   selector: 'app-tabs',
@@ -14,6 +19,7 @@ import { BookingsService } from '../../core/bookings.service.ts';
   template: `
     <native-header [hidden]="true" />
     <native-tabs-outlet>
+      <native-tab path="home" title="Inicio" sfSymbol="house.fill" />
       <native-tab path="explore" title="Explorar" sfSymbol="magnifyingglass" />
       <native-tab path="bookings" title="Mis reservas" sfSymbol="suitcase.fill" [badge]="badge()" />
     </native-tabs-outlet>
@@ -26,8 +32,20 @@ import { BookingsService } from '../../core/bookings.service.ts';
 })
 export class TabsPage {
   private readonly bookings = inject(BookingsService);
+  private readonly onboarding = inject(OnboardingService);
+  private readonly nav = inject(NativeNavigation);
+  private welcomed = false;
+
   protected readonly badge = computed(() => {
     const count = this.bookings.count();
     return count > 0 ? String(count) : undefined;
   });
+
+  constructor() {
+    effect(() => {
+      if (!this.onboarding.shouldWelcome() || this.welcomed) return;
+      this.welcomed = true;
+      void this.nav.present(['/welcome'], { as: 'fullScreenModal' });
+    });
+  }
 }

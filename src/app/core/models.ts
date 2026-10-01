@@ -1,9 +1,13 @@
+/** The kinds of place the Home and Explore chips filter by. */
+export type StayCategory = 'Ciudad' | 'Playa' | 'Montaña';
+
 /** A place to stay, as `GET /api/stays` returns it. */
 export interface Stay {
   readonly id: string;
   readonly name: string;
   readonly city: string;
   readonly country: string;
+  readonly category: StayCategory;
   readonly pricePerNight: number;
   readonly rating: number;
   readonly maxGuests: number;

@@ -3,16 +3,18 @@ import { Component, inject, input, resource } from '@angular/core';
 import {
   ActivityIndicator,
   Image,
-  Pressable,
   ScrollView,
   Text,
   View,
 } from '@ng-native/components';
 import { NativeHeader, NativeNavigation, TabSafeAreaView } from '@ng-native/router';
 import { StaysService } from '../../core/stays.service.ts';
+import { Aura } from '../../ui/aura.ts';
+import { Badge } from '../../ui/badge.ts';
+import { Button } from '../../ui/button.ts';
 
 /**
- * One stay, pushed inside the Explore tab. `id` is the route's `:id`, bound as an input by
+ * One stay, pushed inside the Home or the Explore tab. `id` is the route's `:id`, bound as an input by
  * `withComponentInputBinding()`, and the `resource()` reloads whenever it changes.
  *
  * https://ng-native.com/packages/router#setting-it-up
@@ -22,32 +24,45 @@ import { StaysService } from '../../core/stays.service.ts';
   selector: 'app-stay-detail',
   imports: [
     ActivityIndicator,
+    Aura,
+    Badge,
+    Button,
     CurrencyPipe,
     Image,
     NativeHeader,
-    Pressable,
     ScrollView,
     TabSafeAreaView,
     Text,
     View,
   ],
   template: `
-    <native-header [title]="stay.value()?.name ?? ''" backTitle="Explorar" />
+    <native-header [title]="stay.value()?.name ?? ''" />
+    <app-aura />
 
     @if (stay.value(); as stay) {
       <scroll-view contentInsetAdjustmentBehavior="automatic" class="fill">
-        <image [src]="stay.imageUrl" [alt]="'Foto de ' + stay.name" resizeMode="cover" class="photo" />
-        <view class="body">
+        <view class="hero">
+          <image [src]="stay.imageUrl" [alt]="'Foto de ' + stay.name" resizeMode="cover" class="photo" />
+          <view class="hero-badge">
+            <app-badge [label]="stay.category" tone="glass" />
+          </view>
+        </view>
+        <view class="body rise">
+          <view class="title-row">
+            <text class="overline">{{ stay.city }}, {{ stay.country }}</text>
+            <text class="rating"><text class="star">★</text> {{ stay.rating }}</text>
+          </view>
           <text class="name" accessibilityRole="header">{{ stay.name }}</text>
-          <text class="muted">
-            {{ stay.city }}, {{ stay.country }} · <text class="star">★</text> {{ stay.rating }} · hasta {{ stay.maxGuests }} huéspedes
-          </text>
+          <text class="muted">Hasta {{ stay.maxGuests }} huéspedes</text>
           <text class="description">{{ stay.description }}</text>
 
           <text class="section" accessibilityRole="header">Lo que ofrece</text>
           <view class="chips">
             @for (amenity of stay.amenities; track amenity) {
-              <view class="chip"><text class="chip-label">{{ amenity }}</text></view>
+              <view class="chip">
+                <view class="chip-dot"></view>
+                <text class="chip-label">{{ amenity }}</text>
+              </view>
             }
           </view>
         </view>
@@ -59,9 +74,7 @@ import { StaysService } from '../../core/stays.service.ts';
             {{ stay.pricePerNight | currency: 'USD' : 'symbol' : '1.0-0' }}
             <text class="unit"> / noche</text>
           </text>
-          <pressable accessibilityRole="button" class="book" (press)="book(stay.id)">
-            <text class="book-label">Reservar</text>
-          </pressable>
+          <app-button label="Reservar" size="lg" (press)="book(stay.id)" />
         </tab-safe-area-view>
       </view>
     } @else if (stay.error()) {
@@ -78,7 +91,6 @@ import { StaysService } from '../../core/stays.service.ts';
     :host {
       flex: 1;
       background-color: var(--bg);
-      background-image: radial-gradient(circle at 90% 0%, var(--ice), var(--bg) 70%);
     }
     .fill {
       flex: 1;
@@ -91,11 +103,35 @@ import { StaysService } from '../../core/stays.service.ts';
     .spinner {
       color: var(--royal);
     }
-    .photo {
-      height: 260px;
+    .hero {
       margin: var(--space-2) var(--space-5) 0;
+    }
+    .photo {
+      height: 300px;
       border-radius: var(--radius-xl);
       background-color: var(--ice);
+    }
+    .hero-badge {
+      position: absolute;
+      top: var(--space-4);
+      left: var(--space-4);
+    }
+    .title-row {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .overline {
+      color: var(--royal-strong);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+    }
+    .rating {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
     }
     .body {
       gap: var(--space-2);
@@ -103,8 +139,8 @@ import { StaysService } from '../../core/stays.service.ts';
     }
     .name {
       color: var(--ink);
-      font-size: 22px;
-      line-height: 28px;
+      font-size: 28px;
+      line-height: 34px;
       font-weight: 700;
       letter-spacing: -0.2px;
     }
@@ -136,11 +172,20 @@ import { StaysService } from '../../core/stays.service.ts';
       gap: var(--space-2);
     }
     .chip {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-2);
       padding: var(--space-2) var(--space-3);
       border-width: 1px;
       border-color: var(--glass-border);
       border-radius: var(--radius-pill);
       background-color: var(--glass);
+    }
+    .chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 3px;
+      background-color: var(--royal);
     }
     .chip-label {
       color: var(--ink);
@@ -173,18 +218,23 @@ import { StaysService } from '../../core/stays.service.ts';
       font-size: 12px;
       font-weight: 500;
     }
-    .book {
-      min-height: 48px;
-      justify-content: center;
-      padding: 0 28px;
-      border-radius: var(--radius-pill);
-      background-color: var(--royal);
-      box-shadow: var(--shadow-royal);
+    .rise {
+      animation: detail-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
     }
-    .book-label {
-      color: var(--on-royal);
-      font-size: 15px;
-      font-weight: 700;
+    @keyframes detail-rise {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0px);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rise {
+        animation-name: none;
+      }
     }
   `,
 })

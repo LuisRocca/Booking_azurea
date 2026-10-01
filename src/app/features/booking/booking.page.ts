@@ -21,12 +21,13 @@ import {
   TextInput,
   View,
 } from '@ng-native/components';
-import { Dialogs } from '@ng-native/device';
 import { NativeNavigation } from '@ng-native/router';
 import { BREAKFAST_PER_GUEST_NIGHT, bookingTotal, isoDate } from '../../core/booking-rules.ts';
 import { BookingsService } from '../../core/bookings.service.ts';
 import type { ApiError } from '../../core/models.ts';
 import { StaysService } from '../../core/stays.service.ts';
+import { Aura } from '../../ui/aura.ts';
+import { Button } from '../../ui/button.ts';
 
 const WEEKDAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MAX_NIGHTS = 14;
@@ -55,6 +56,8 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
 @Component({
   selector: 'app-booking',
   imports: [
+    Aura,
+    Button,
     CurrencyPipe,
     FormField,
     KeyboardAvoidingView,
@@ -68,6 +71,7 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
     View,
   ],
   template: `
+    <app-aura />
     <safe-area-provider [reportInsets]="false" class="fill">
       <safe-area-view class="fill" [edges]="['top', 'bottom']">
         <view class="top-bar">
@@ -207,15 +211,11 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
               <text class="total">{{ total() | currency: 'USD' : 'symbol' : '1.0-0' }}</text>
               <text class="muted">{{ summary() }}</text>
             </view>
-            <pressable
-              accessibilityRole="button"
-              class="confirm"
+            <app-button
+              [label]="f().submitting() ? 'Confirmando…' : 'Confirmar'"
               [disabled]="f().submitting()"
-              [style.opacity]="f().submitting() ? 0.6 : 1"
               (press)="confirm()"
-            >
-              <text class="confirm-label">{{ f().submitting() ? 'Confirmando…' : 'Confirmar' }}</text>
-            </pressable>
+            />
           </view>
         </keyboard-avoiding-view>
       </safe-area-view>
@@ -226,7 +226,6 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
     :host {
       flex: 1;
       background-color: var(--bg);
-      background-image: radial-gradient(circle at 90% 0%, var(--ice), var(--bg) 70%);
     }
     .fill {
       flex: 1;
@@ -287,11 +286,18 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
       border-color: var(--glass-border);
       border-radius: var(--radius-md);
       background-color: var(--glass);
+      transform: translateY(0px);
+      transition:
+        background-color 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
     }
+    /* The chosen day turns royal and lifts 2pt, easing into place. */
     .day[data-selected] {
       border-color: var(--royal);
       background-color: var(--royal);
       box-shadow: var(--shadow-royal);
+      transform: translateY(-2px);
     }
     .day-weekday {
       color: var(--ink-subtle);
@@ -380,25 +386,11 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
       line-height: 24px;
       font-weight: 800;
     }
-    .confirm {
-      min-height: 48px;
-      justify-content: center;
-      padding: 0 var(--space-6);
-      border-radius: var(--radius-pill);
-      background-color: var(--royal);
-      box-shadow: var(--shadow-royal);
-    }
-    .confirm-label {
-      color: var(--on-royal);
-      font-size: 15px;
-      font-weight: 700;
-    }
   `,
 })
 export class BookingPage {
   private readonly stays = inject(StaysService);
   private readonly bookings = inject(BookingsService);
-  private readonly dialogs = inject(Dialogs);
   protected readonly nav = inject(NativeNavigation);
 
   readonly stayId = input.required<string>();
@@ -461,11 +453,8 @@ export class BookingPage {
       action: async () => {
         try {
           const booking = await this.bookings.create({ stayId: this.stayId(), ...this.data() });
-          this.nav.back();
-          await this.dialogs.tell(
-            '¡Reserva confirmada!',
-            `${booking.stayName}, ${booking.nights} noches. La encontrarás en Mis reservas.`,
-          );
+          // The form gives way to its reward: the confirmation takes this modal's place.
+          await this.nav.replace(['/confirmation', booking.id]);
           return;
         } catch (error) {
           const apiError = error instanceof HttpErrorResponse ? (error.error as ApiError) : null;

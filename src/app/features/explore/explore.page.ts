@@ -1,23 +1,16 @@
-import { CurrencyPipe } from '@angular/common';
 import { Component, computed, inject, resource, signal } from '@angular/core';
-import {
-  ActivityIndicator,
-  Image,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from '@ng-native/components';
-import {
-  NativeHeader,
-  NativeHeaderItem,
-  NativeRouterLink,
-  NativeSearchBar,
-} from '@ng-native/router';
+import { ActivityIndicator, ScrollView, Text, View } from '@ng-native/components';
+import { NativeHeader, NativeHeaderItem, NativeSearchBar } from '@ng-native/router';
+import { Aura } from '../../ui/aura.ts';
 import { StaysService } from '../../core/stays.service.ts';
+import { Button } from '../../ui/button.ts';
+import { Chips } from '../../ui/chip.ts';
+import { StayCard } from '../../ui/stay-card.ts';
+import { CATEGORIES } from '../home/home.page.ts';
 
 /**
- * The list of stays: loaded with `resource()` and filtered from the header's search bar.
+ * The list of stays: loaded with `resource()` and filtered from the header's search bar and the
+ * category chips, both at once. Each card rises in 60ms after the one above it.
  *
  * A handful of stays, so a `<scroll-view>`, which renders everything. A catalog that grows
  * without bound wants `<virtual-list>` instead, but see KNOWN_ISSUES.md: in @ng-native 0.1.3
@@ -30,14 +23,14 @@ import { StaysService } from '../../core/stays.service.ts';
   selector: 'app-explore',
   imports: [
     ActivityIndicator,
-    CurrencyPipe,
-    Image,
+    Aura,
+    Button,
+    Chips,
     NativeHeader,
     NativeHeaderItem,
-    NativeRouterLink,
     NativeSearchBar,
-    Pressable,
     ScrollView,
+    StayCard,
     Text,
     View,
   ],
@@ -47,6 +40,7 @@ import { StaysService } from '../../core/stays.service.ts';
         <native-search-bar placeholder="Ciudad o alojamiento" [(query)]="query" />
       </native-header-item>
     </native-header>
+    <app-aura />
 
     @if (stays.isLoading()) {
       <view class="centered">
@@ -55,35 +49,18 @@ import { StaysService } from '../../core/stays.service.ts';
     } @else if (stays.error()) {
       <view class="centered">
         <text class="muted">No se pudieron cargar los alojamientos.</text>
-        <pressable accessibilityRole="button" class="retry" (press)="stays.reload()">
-          <text class="retry-label">Reintentar</text>
-        </pressable>
+        <app-button label="Reintentar" (press)="stays.reload()" />
       </view>
     } @else {
       <scroll-view contentInsetAdjustmentBehavior="automatic" class="list">
         <view class="content">
+          <app-chips [options]="categories" [(value)]="category" />
           @for (stay of shown(); track stay.id) {
-            <pressable
-              #card="pressable"
-              accessibilityRole="button"
-              [accessibilityLabel]="stay.name + ', ' + stay.city"
-              [nativeRouterLink]="['/explore/stay', stay.id]"
-              class="card"
-              [style.opacity]="card.pressed() ? 0.7 : 1"
-            >
-              <image [src]="stay.imageUrl" resizeMode="cover" class="photo" />
-              <view class="info">
-                <view class="title-row">
-                  <text class="name" [numberOfLines]="1">{{ stay.name }}</text>
-                  <text class="rating"><text class="star">★</text> {{ stay.rating }}</text>
-                </view>
-                <text class="muted">{{ stay.city }}, {{ stay.country }}</text>
-                <text class="price">
-                  {{ stay.pricePerNight | currency: 'USD' : 'symbol' : '1.0-0' }}
-                  <text class="unit"> / noche</text>
-                </text>
-              </view>
-            </pressable>
+            <app-stay-card
+              class="rise"
+              [stay]="stay"
+              [link]="['/explore/stay', stay.id]"
+            />
           }
           <text class="muted footer">
             {{ shown().length }} {{ shown().length === 1 ? 'alojamiento' : 'alojamientos' }}
@@ -97,7 +74,6 @@ import { StaysService } from '../../core/stays.service.ts';
     :host {
       flex: 1;
       background-color: var(--bg);
-      background-image: radial-gradient(circle at 90% 0%, var(--ice), var(--bg) 70%);
     }
     .centered {
       flex: 1;
@@ -116,94 +92,66 @@ import { StaysService } from '../../core/stays.service.ts';
       gap: var(--space-4);
       padding: var(--space-2) var(--space-5) 0;
     }
-    /* Glass card: translucent fill, a bright 1px edge and a soft blue shadow. */
-    .card {
-      padding: var(--space-2);
-      border-width: 1px;
-      border-color: var(--glass-border);
-      border-radius: var(--radius-lg);
-      background-color: var(--glass);
-      box-shadow: var(--shadow-glass);
-    }
-    /* Inner radius = outer radius - padding: 24 - 8. */
-    .photo {
-      height: 172px;
-      border-radius: 16px;
-      background-color: var(--ice);
-    }
-    .info {
-      gap: 2px;
-      padding: var(--space-3) var(--space-2) var(--space-2);
-    }
-    .title-row {
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      gap: var(--space-2);
-    }
-    .name {
-      flex: 1;
-      color: var(--ink);
-      font-size: 17px;
-      line-height: 22px;
-      font-weight: 600;
-    }
-    .rating {
-      color: var(--ink);
-      font-size: 14px;
-      font-weight: 600;
-    }
-    .star {
-      color: var(--star);
-    }
-    .price {
-      margin-top: 2px;
-      color: var(--ink);
-      font-size: 20px;
-      line-height: 24px;
-      font-weight: 800;
-      letter-spacing: -0.2px;
-    }
     .muted {
       color: var(--ink-muted);
       font-size: 14px;
       font-weight: 500;
-    }
-    .unit {
-      color: var(--ink-subtle);
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0;
-    }
-    .retry {
-      min-height: 44px;
-      justify-content: center;
-      padding: 0 var(--space-6);
-      border-radius: var(--radius-pill);
-      background-color: var(--royal);
-      box-shadow: var(--shadow-royal);
-    }
-    .retry-label {
-      color: var(--on-royal);
-      font-size: 14px;
-      font-weight: 600;
     }
     /* Room for the tab bar, which Android draws over the end of the list. */
     .footer {
       text-align: center;
       padding-bottom: 120px;
     }
+    .rise {
+      animation: explore-rise 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    /* The chips are child 1, so the cards are 2 onwards: 60ms apart. */
+    .rise:nth-child(3) {
+      animation-delay: 60ms;
+    }
+    .rise:nth-child(4) {
+      animation-delay: 120ms;
+    }
+    .rise:nth-child(5) {
+      animation-delay: 180ms;
+    }
+    .rise:nth-child(6) {
+      animation-delay: 240ms;
+    }
+    .rise:nth-child(n + 7) {
+      animation-delay: 300ms;
+    }
+    @keyframes explore-rise {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0px);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rise {
+        animation-name: none;
+      }
+    }
   `,
 })
 export class ExplorePage {
   private readonly api = inject(StaysService);
 
+  protected readonly categories = CATEGORIES;
+  protected readonly category = signal<string>('Todo');
   protected readonly query = signal('');
   protected readonly stays = resource({ loader: () => this.api.list() });
   protected readonly shown = computed(() => {
     const query = this.query().trim().toLowerCase();
-    const stays = this.stays.value() ?? [];
-    if (!query) return stays;
-    return stays.filter((stay) => `${stay.name} ${stay.city}`.toLowerCase().includes(query));
+    const category = this.category();
+    return (this.stays.value() ?? []).filter(
+      (stay) =>
+        (category === 'Todo' || stay.category === category) &&
+        (!query || `${stay.name} ${stay.city}`.toLowerCase().includes(query)),
+    );
   });
 }
