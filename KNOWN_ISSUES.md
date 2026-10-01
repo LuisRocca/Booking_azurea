@@ -64,10 +64,12 @@ Read before debugging. Format: problem → cause → fix / prevention.
 ## Metro: "Unable to resolve module" for a file that exists
 
 - **Problem:** after creating a file (e.g. `src/app/ui/icon.ts`) the device shows a 500 from Metro
-  with `UnableToResolveError`, though `npx expo export` bundles fine. Edits do not hot reload
-  either.
-- **Cause:** Metro was started from `/home/...`, but on Fedora Silverblue `/home` is a symlink to
-  `/var/home`. Metro maps files by their real path and ignores watcher events reported under the
-  other one, so it never sees a new or changed file.
-- **Fix / prevention:** start Metro from the real path: `cd "$(pwd -P)" && npx expo start --clear`.
-  Do not set `CI=1` for development: it turns watch mode and reloads off.
+  with `UnableToResolveError`, though the file is there and `npx expo export` bundles fine. Edits
+  do not hot reload either.
+- **Cause:** that Metro process had stopped receiving file-watcher events, so its file map never
+  learned about new or changed files. Why it stopped is not known: a Metro started from the same
+  path (`/home`, a symlink to `/var/home` on Silverblue) picked up a new file when tested, so the
+  symlink is not the cause.
+- **Fix / prevention:** restart Metro with a cleared cache: `npx expo start --clear`. Compare with
+  `npx expo export --platform android` to tell a stale Metro from a real resolution error. Do not
+  set `CI=1` for development: it turns watch mode and reloads off.
