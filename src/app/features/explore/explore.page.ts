@@ -149,7 +149,8 @@ export class ExplorePage {
   protected readonly shown = computed(() => {
     const query = this.query().trim().toLowerCase();
     const category = this.category();
-    return (this.stays.value() ?? []).filter(
+    const all = this.stays.hasValue() ? this.stays.value() : [];
+    return all.filter(
       (stay) =>
         (category === 'Todo' || stay.category === category) &&
         (!query || `${stay.name} ${stay.city}`.toLowerCase().includes(query)),

@@ -80,3 +80,11 @@ it('saves a valid booking', async () => {
     total: 190,
   });
 });
+
+it('keeps the form usable when the stay cannot be loaded', async () => {
+  // resource.value() throws while in error; the page must read hasValue() first.
+  await render(BookingPage, { inputs: { stayId: 'atlantis' }, providers: appProviders });
+
+  expect(await screen.findByText('Llegada')).toBeTruthy();
+  expect(await screen.findByText('$0')).toBeTruthy();
+});

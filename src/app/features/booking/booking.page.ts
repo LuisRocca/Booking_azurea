@@ -87,7 +87,7 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
         <keyboard-avoiding-view class="fill">
           <scroll-view class="fill" keyboardShouldPersistTaps="handled">
             <view class="body">
-              <text class="stay-name">{{ stay.value()?.name }}</text>
+              <text class="stay-name">{{ stay.hasValue() ? stay.value().name : '' }}</text>
 
               <text class="label" accessibilityRole="header">Llegada</text>
               <view class="days">
@@ -399,7 +399,8 @@ export class BookingPage {
     params: () => ({ id: this.stayId() }),
     loader: ({ params }) => this.stays.get(params.id),
   });
-  protected readonly maxGuests = computed(() => this.stay.value()?.maxGuests ?? 1);
+  // value() throws while the resource is in error, so each read asks hasValue() first.
+  protected readonly maxGuests = computed(() => (this.stay.hasValue() ? this.stay.value().maxGuests : 1));
 
   protected readonly status = signal<'idle' | 'error'>('idle');
   protected readonly data = signal({
@@ -427,8 +428,7 @@ export class BookingPage {
   });
 
   protected readonly total = computed(() => {
-    const stay = this.stay.value();
-    return stay ? bookingTotal(stay, this.data()) : 0;
+    return this.stay.hasValue() ? bookingTotal(this.stay.value(), this.data()) : 0;
   });
 
   protected pickDay(iso: string): void {

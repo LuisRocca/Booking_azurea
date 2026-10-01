@@ -58,10 +58,11 @@ const AMENITY_ICONS: Record<string, IconName> = {
     View,
   ],
   template: `
-    <native-header [title]="stay.value()?.name ?? ''" />
+    <!-- value() throws while the resource is in error: ask hasValue() first. -->
+    <native-header [title]="stay.hasValue() ? stay.value().name : ''" />
     <app-aura />
 
-    @if (stay.value(); as stay) {
+    @if (stay.hasValue() ? stay.value() : undefined; as stay) {
       <scroll-view contentInsetAdjustmentBehavior="automatic" class="fill">
         <view class="hero">
           <image [src]="stay.imageUrl" [alt]="'Foto de ' + stay.name" resizeMode="cover" class="photo" />

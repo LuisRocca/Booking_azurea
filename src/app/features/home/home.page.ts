@@ -264,7 +264,7 @@ export class HomePage {
   protected readonly stays = resource({ loader: () => this.api.list() });
 
   private readonly filtered = computed<readonly Stay[]>(() => {
-    const all = this.stays.value() ?? [];
+    const all = this.stays.hasValue() ? this.stays.value() : [];
     const category = this.category();
     return category === 'Todo' ? all : all.filter((stay) => stay.category === category);
   });
