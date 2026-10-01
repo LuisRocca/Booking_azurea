@@ -12,6 +12,27 @@ import { StaysService } from '../../core/stays.service.ts';
 import { Aura } from '../../ui/aura.ts';
 import { Badge } from '../../ui/badge.ts';
 import { Button } from '../../ui/button.ts';
+import { Icon, type IconName } from '../../ui/icon.ts';
+
+/** The icon for each amenity in the data; one not listed here gets a sparkle. */
+const AMENITY_ICONS: Record<string, IconName> = {
+  Wifi: 'wifi',
+  Cocina: 'utensils',
+  'Aire acondicionado': 'snowflake',
+  'Vistas al río': 'waves',
+  Terraza: 'sun',
+  Lavadora: 'washer',
+  Chimenea: 'flame',
+  'Desayuno disponible': 'coffee',
+  Patio: 'leaf',
+  Escritorio: 'laptop',
+  Gimnasio: 'dumbbell',
+  Piscina: 'waves',
+  Azotea: 'sun',
+  'Estufa a leña': 'flame',
+  Muelle: 'waves',
+  Estacionamiento: 'pin',
+};
 
 /**
  * One stay, pushed inside the Home or the Explore tab. `id` is the route's `:id`, bound as an input by
@@ -28,6 +49,7 @@ import { Button } from '../../ui/button.ts';
     Badge,
     Button,
     CurrencyPipe,
+    Icon,
     Image,
     NativeHeader,
     ScrollView,
@@ -49,8 +71,14 @@ import { Button } from '../../ui/button.ts';
         </view>
         <view class="body rise">
           <view class="title-row">
-            <text class="overline">{{ stay.city }}, {{ stay.country }}</text>
-            <text class="rating"><text class="star">★</text> {{ stay.rating }}</text>
+            <view class="place">
+              <app-icon name="pin" tone="royal-strong" [size]="14" />
+              <text class="overline">{{ stay.city }}, {{ stay.country }}</text>
+            </view>
+            <view class="rating">
+              <app-icon name="star-filled" tone="star" [size]="16" />
+              <text class="rating-value">{{ stay.rating }}</text>
+            </view>
           </view>
           <text class="name" accessibilityRole="header">{{ stay.name }}</text>
           <text class="muted">Hasta {{ stay.maxGuests }} huéspedes</text>
@@ -60,7 +88,7 @@ import { Button } from '../../ui/button.ts';
           <view class="chips">
             @for (amenity of stay.amenities; track amenity) {
               <view class="chip">
-                <view class="chip-dot"></view>
+                <app-icon [name]="amenityIcon(amenity)" tone="royal" [size]="18" />
                 <text class="chip-label">{{ amenity }}</text>
               </view>
             }
@@ -128,7 +156,13 @@ import { Button } from '../../ui/button.ts';
       letter-spacing: 0.9px;
       text-transform: uppercase;
     }
+    .place,
     .rating {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-1);
+    }
+    .rating-value {
       color: var(--ink);
       font-size: 14px;
       font-weight: 700;
@@ -149,9 +183,6 @@ import { Button } from '../../ui/button.ts';
       font-size: 14px;
       line-height: 20px;
       font-weight: 500;
-    }
-    .star {
-      color: var(--star);
     }
     .description {
       margin-top: var(--space-2);
@@ -180,12 +211,6 @@ import { Button } from '../../ui/button.ts';
       border-color: var(--glass-border);
       border-radius: var(--radius-pill);
       background-color: var(--glass);
-    }
-    .chip-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 3px;
-      background-color: var(--royal);
     }
     .chip-label {
       color: var(--ink);
@@ -247,6 +272,10 @@ export class StayDetailPage {
     params: () => ({ id: this.id() }),
     loader: ({ params }) => this.api.get(params.id),
   });
+
+  protected amenityIcon(amenity: string): IconName {
+    return AMENITY_ICONS[amenity] ?? 'sparkle';
+  }
 
   /** A modal over the whole app, outside the tab's stack: see booking.page.ts. */
   protected book(stayId: string): void {

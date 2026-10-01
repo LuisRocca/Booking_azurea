@@ -28,6 +28,7 @@ import type { ApiError } from '../../core/models.ts';
 import { StaysService } from '../../core/stays.service.ts';
 import { Aura } from '../../ui/aura.ts';
 import { Button } from '../../ui/button.ts';
+import { Icon } from '../../ui/icon.ts';
 
 const WEEKDAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MAX_NIGHTS = 14;
@@ -60,6 +61,7 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
     Button,
     CurrencyPipe,
     FormField,
+    Icon,
     KeyboardAvoidingView,
     Pressable,
     SafeAreaProvider,
@@ -118,7 +120,7 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
                     class="step"
                     (press)="changeNights(-1)"
                   >
-                    <text class="step-label">−</text>
+                    <app-icon name="minus" tone="royal-strong" [size]="20" />
                   </pressable>
                   <text class="step-value">{{ data().nights }}</text>
                   <pressable
@@ -129,7 +131,7 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
                     class="step"
                     (press)="changeNights(1)"
                   >
-                    <text class="step-label">+</text>
+                    <app-icon name="plus" tone="royal-strong" [size]="20" />
                   </pressable>
                 </view>
               </view>
@@ -145,7 +147,7 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
                     class="step"
                     (press)="changeGuests(-1)"
                   >
-                    <text class="step-label">−</text>
+                    <app-icon name="minus" tone="royal-strong" [size]="20" />
                   </pressable>
                   <text class="step-value">{{ data().guests }}</text>
                   <pressable
@@ -156,7 +158,7 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
                     class="step"
                     (press)="changeGuests(1)"
                   >
-                    <text class="step-label">+</text>
+                    <app-icon name="plus" tone="royal-strong" [size]="20" />
                   </pressable>
                 </view>
               </view>
@@ -334,11 +336,6 @@ function nextDays(): { iso: string; weekday: string; day: number }[] {
       border-color: var(--glass-border);
       border-radius: var(--radius-pill);
       background-color: var(--glass);
-    }
-    .step-label {
-      color: var(--royal-strong);
-      font-size: 20px;
-      font-weight: 600;
     }
     .step-value {
       min-width: 24px;

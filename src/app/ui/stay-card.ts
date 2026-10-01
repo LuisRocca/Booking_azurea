@@ -3,6 +3,7 @@ import { Component, input } from '@angular/core';
 import { Image, Pressable, Text, View } from '@ng-native/components';
 import { NativeRouterLink } from '@ng-native/router';
 import type { Stay } from '../core/models.ts';
+import { Icon } from './icon.ts';
 
 /**
  * A stay as a glass card, in two shapes: `tall` for the sideways carousel on Home, `row` for
@@ -16,7 +17,7 @@ import type { Stay } from '../core/models.ts';
  */
 @Component({
   selector: 'app-stay-card',
-  imports: [CurrencyPipe, Image, NativeRouterLink, Pressable, Text, View],
+  imports: [CurrencyPipe, Icon, Image, NativeRouterLink, Pressable, Text, View],
   template: `
     <pressable
       #card="pressable"
@@ -31,7 +32,10 @@ import type { Stay } from '../core/models.ts';
       <view class="info">
         <view class="title-row">
           <text class="name" [numberOfLines]="1">{{ stay().name }}</text>
-          <text class="rating"><text class="star">★</text> {{ stay().rating }}</text>
+          <view class="rating">
+            <app-icon name="star-filled" tone="star" [size]="14" />
+            <text class="rating-value">{{ stay().rating }}</text>
+          </view>
         </view>
         <text class="place" [numberOfLines]="1">{{ stay().city }}, {{ stay().country }}</text>
         <text class="price">
@@ -95,12 +99,14 @@ import type { Stay } from '../core/models.ts';
       font-weight: 700;
     }
     .rating {
+      flex-direction: row;
+      align-items: center;
+      gap: 3px;
+    }
+    .rating-value {
       color: var(--ink);
       font-size: 13px;
       font-weight: 700;
-    }
-    .star {
-      color: var(--star);
     }
     .place {
       color: var(--ink-muted);

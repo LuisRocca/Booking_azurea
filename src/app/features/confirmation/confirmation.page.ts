@@ -7,6 +7,7 @@ import { BookingsService } from '../../core/bookings.service.ts';
 import { localDate, shortDate } from '../../core/dates.ts';
 import { Aura } from '../../ui/aura.ts';
 import { Button } from '../../ui/button.ts';
+import { Icon } from '../../ui/icon.ts';
 
 /**
  * The reward after booking, presented as a modal by the booking form in place of itself. The
@@ -21,7 +22,7 @@ import { Button } from '../../ui/button.ts';
  */
 @Component({
   selector: 'app-confirmation',
-  imports: [Aura, Button, CurrencyPipe, SafeAreaProvider, SafeAreaView, ScrollView, Text, View],
+  imports: [Aura, Button, CurrencyPipe, Icon, SafeAreaProvider, SafeAreaView, ScrollView, Text, View],
   template: `
     <app-aura [animated]="true" />
     <safe-area-provider [reportInsets]="false" class="fill">
@@ -30,7 +31,7 @@ import { Button } from '../../ui/button.ts';
           <view class="content">
             <view class="check" importantForAccessibility="no-hide-descendants">
               <view class="ring"></view>
-              <view class="core"><text class="mark">✓</text></view>
+              <view class="core"><app-icon name="check" tone="on-royal" [size]="56" /></view>
             </view>
 
             <view class="headline rise d1">
@@ -110,12 +111,6 @@ import { Button } from '../../ui/button.ts';
       justify-content: center;
       box-shadow: var(--shadow-royal);
       animation: confirm-pop 600ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    }
-    .mark {
-      color: var(--on-royal);
-      font-size: 52px;
-      line-height: 60px;
-      font-weight: 800;
     }
     .headline {
       align-items: center;

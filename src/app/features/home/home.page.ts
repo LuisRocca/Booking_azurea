@@ -14,10 +14,17 @@ import { StaysService } from '../../core/stays.service.ts';
 import { Aura } from '../../ui/aura.ts';
 import { Button } from '../../ui/button.ts';
 import { Chips } from '../../ui/chip.ts';
+import { Icon, type IconName } from '../../ui/icon.ts';
 import { SectionHeader } from '../../ui/section-header.ts';
 import { StayCard } from '../../ui/stay-card.ts';
 
 export const CATEGORIES = ['Todo', 'Ciudad', 'Playa', 'Montaña'] as const;
+export const CATEGORY_ICONS: Record<(typeof CATEGORIES)[number], IconName> = {
+  Todo: 'grid',
+  Ciudad: 'building',
+  Playa: 'beach',
+  Montaña: 'mountain',
+};
 
 /** The best-rated stays go in the carousel; everything else, cheapest first, in the list. */
 const CAROUSEL_SIZE = 3;
@@ -48,6 +55,7 @@ function greeting(now = new Date()): string {
     Aura,
     Button,
     Chips,
+    Icon,
     NativeHeader,
     Pressable,
     SafeAreaView,
@@ -78,8 +86,7 @@ function greeting(now = new Date()): string {
             (press)="openExplore()"
           >
             <view class="search-icon">
-              <view class="lens"></view>
-              <view class="handle"></view>
+              <app-icon name="search" tone="on-royal" [size]="22" />
             </view>
             <view class="fill">
               <text class="search-main">Busca un destino</text>
@@ -88,7 +95,7 @@ function greeting(now = new Date()): string {
           </pressable>
 
           <view class="rise d2">
-            <app-chips [options]="categories" [(value)]="category" />
+            <app-chips [options]="categories" [icons]="categoryIcons" [(value)]="category" />
           </view>
 
           @if (stays.isLoading()) {
@@ -182,25 +189,6 @@ function greeting(now = new Date()): string {
       background-color: var(--royal);
       box-shadow: var(--shadow-royal);
     }
-    /* A magnifier drawn with two views: a ring and a short rotated bar. */
-    .lens {
-      width: 16px;
-      height: 16px;
-      margin: -3px 0 0 -3px;
-      border-width: 2.5px;
-      border-color: var(--on-royal);
-      border-radius: 8px;
-    }
-    .handle {
-      position: absolute;
-      top: 27px;
-      left: 27px;
-      width: 2.5px;
-      height: 8px;
-      border-radius: 2px;
-      background-color: var(--on-royal);
-      transform: rotate(-45deg);
-    }
     .search-main {
       color: var(--ink);
       font-size: 15px;
@@ -271,6 +259,7 @@ export class HomePage {
 
   protected readonly hello = greeting();
   protected readonly categories = CATEGORIES;
+  protected readonly categoryIcons = CATEGORY_ICONS;
   protected readonly category = signal<string>('Todo');
   protected readonly stays = resource({ loader: () => this.api.list() });
 

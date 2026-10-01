@@ -6,7 +6,7 @@ import { StaysService } from '../../core/stays.service.ts';
 import { Button } from '../../ui/button.ts';
 import { Chips } from '../../ui/chip.ts';
 import { StayCard } from '../../ui/stay-card.ts';
-import { CATEGORIES } from '../home/home.page.ts';
+import { CATEGORIES, CATEGORY_ICONS } from '../home/home.page.ts';
 
 /**
  * The list of stays: loaded with `resource()` and filtered from the header's search bar and the
@@ -54,7 +54,7 @@ import { CATEGORIES } from '../home/home.page.ts';
     } @else {
       <scroll-view contentInsetAdjustmentBehavior="automatic" class="list">
         <view class="content">
-          <app-chips [options]="categories" [(value)]="category" />
+          <app-chips [options]="categories" [icons]="categoryIcons" [(value)]="category" />
           @for (stay of shown(); track stay.id) {
             <app-stay-card
               class="rise"
@@ -142,6 +142,7 @@ export class ExplorePage {
   private readonly api = inject(StaysService);
 
   protected readonly categories = CATEGORIES;
+  protected readonly categoryIcons = CATEGORY_ICONS;
   protected readonly category = signal<string>('Todo');
   protected readonly query = signal('');
   protected readonly stays = resource({ loader: () => this.api.list() });

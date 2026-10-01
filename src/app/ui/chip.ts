@@ -1,17 +1,19 @@
 import { Component, input, model } from '@angular/core';
 import { Pressable, ScrollView, Text, View } from '@ng-native/components';
+import { Icon, type IconName } from './icon.ts';
 
 /**
  * A row of single-choice glass chips that scrolls sideways: categories on Home and Explore.
  * `value` is a two-way `model()`, so a page writes `[(value)]="category"`. The chosen chip turns
  * royal; its colors ease over, since a transition interpolates colors channel by channel.
+ * `icons` optionally puts an icon before an option's label.
  *
  * https://ng-native.com/packages/components/scroll-view
  * https://angular.dev/guide/components/inputs#model-inputs
  */
 @Component({
   selector: 'app-chips',
-  imports: [Pressable, ScrollView, Text, View],
+  imports: [Icon, Pressable, ScrollView, Text, View],
   template: `
     <scroll-view [horizontal]="true" [showsHorizontalScrollIndicator]="false" class="scroller">
       <view class="row" accessibilityRole="radiogroup">
@@ -25,6 +27,9 @@ import { Pressable, ScrollView, Text, View } from '@ng-native/components';
             [attr.data-pressed]="chip.pressed() ? '' : null"
             (press)="value.set(option)"
           >
+            @if (icons()[option]; as icon) {
+              <app-icon [name]="icon" [tone]="value() === option ? 'on-royal' : 'muted'" [size]="18" />
+            }
             <text class="label">{{ option }}</text>
           </pressable>
         }
@@ -43,7 +48,9 @@ import { Pressable, ScrollView, Text, View } from '@ng-native/components';
     }
     .chip {
       min-height: 38px;
-      justify-content: center;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
       padding: 0 var(--space-4);
       border-width: 1px;
       border-color: var(--glass-border);
@@ -76,4 +83,5 @@ import { Pressable, ScrollView, Text, View } from '@ng-native/components';
 export class Chips {
   readonly options = input.required<readonly string[]>();
   readonly value = model.required<string>();
+  readonly icons = input<Partial<Record<string, IconName>>>({});
 }

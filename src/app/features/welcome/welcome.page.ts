@@ -4,6 +4,7 @@ import { NativeNavigation } from '@ng-native/router';
 import { OnboardingService } from '../../core/onboarding.service.ts';
 import { Aura } from '../../ui/aura.ts';
 import { Button } from '../../ui/button.ts';
+import { Icon } from '../../ui/icon.ts';
 
 /**
  * Shown once, the first time the app opens, presented full screen over the tabs by `TabsPage`.
@@ -17,7 +18,7 @@ import { Button } from '../../ui/button.ts';
  */
 @Component({
   selector: 'app-welcome',
-  imports: [Aura, Button, SafeAreaProvider, SafeAreaView, Text, View],
+  imports: [Aura, Button, Icon, SafeAreaProvider, SafeAreaView, Text, View],
   template: `
     <app-aura [animated]="true" />
     <safe-area-provider [reportInsets]="false" class="fill">
@@ -26,7 +27,7 @@ import { Button } from '../../ui/button.ts';
           <view class="tile tile-one float"></view>
           <view class="tile tile-two float late"></view>
           <view class="pill float later">
-            <view class="pill-check"><text class="pill-check-mark">✓</text></view>
+            <view class="pill-check"><app-icon name="check" tone="on-royal" [size]="18" /></view>
             <view>
               <text class="pill-title">Reserva confirmada</text>
               <text class="caption">3 noches · 2 huéspedes</text>
@@ -97,11 +98,6 @@ import { Button } from '../../ui/button.ts';
       justify-content: center;
       border-radius: 16px;
       background-color: var(--royal);
-    }
-    .pill-check-mark {
-      color: var(--on-royal);
-      font-size: 16px;
-      font-weight: 800;
     }
     .pill-title {
       color: var(--ink);

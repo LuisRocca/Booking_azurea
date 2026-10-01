@@ -2,9 +2,13 @@ import { Component, computed, effect, inject } from '@angular/core';
 import { NativeHeader, NativeNavigation, NativeTab, NativeTabsOutlet } from '@ng-native/router';
 import { BookingsService } from '../../core/bookings.service.ts';
 import { OnboardingService } from '../../core/onboarding.service.ts';
+import { ICONS } from '../../ui/icon.ts';
 
 /**
- * A real tab bar. Tabs are declared as content, so a badge is just a signal.
+ * A real tab bar. Tabs are declared as content, so a badge is just a signal. Each icon is an
+ * Azurea PNG given as a `template`: native draws it as a mask and tints it with the bar's color,
+ * on iOS and Android alike.
+ *
  * The root stack's header is hidden: each tab's own stack draws its header.
  *
  * The first time the app opens, Welcome is presented full screen over the tabs. The effect waits
@@ -19,9 +23,9 @@ import { OnboardingService } from '../../core/onboarding.service.ts';
   template: `
     <native-header [hidden]="true" />
     <native-tabs-outlet>
-      <native-tab path="home" title="Inicio" sfSymbol="house.fill" />
-      <native-tab path="explore" title="Explorar" sfSymbol="magnifyingglass" />
-      <native-tab path="bookings" title="Mis reservas" sfSymbol="suitcase.fill" [badge]="badge()" />
+      <native-tab path="home" title="Inicio" [icon]="icons.home" />
+      <native-tab path="explore" title="Explorar" [icon]="icons.explore" />
+      <native-tab path="bookings" title="Mis reservas" [icon]="icons.bookings" [badge]="badge()" />
     </native-tabs-outlet>
   `,
   styles: `
@@ -35,6 +39,12 @@ export class TabsPage {
   private readonly onboarding = inject(OnboardingService);
   private readonly nav = inject(NativeNavigation);
   private welcomed = false;
+
+  protected readonly icons = {
+    home: { template: ICONS.home },
+    explore: { template: ICONS.search },
+    bookings: { template: ICONS.suitcase },
+  };
 
   protected readonly badge = computed(() => {
     const count = this.bookings.count();
